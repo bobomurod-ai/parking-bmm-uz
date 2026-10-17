@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Parking BMM_UZ - O'zbekiston Virtual Avto & Parkovka Simulyatori</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- WebGL 3D Canvas -->
+  <div id="canvas-container"></div>
+
+  <!-- UI Overlay System -->
+  <div id="ui-overlay">
+
+    <!-- 1. ASOSIY MENYU (MAIN MENU) -->
+    <div id="main-menu" class="screen active">
+      <div class="menu-header">
+        <div class="logo-badge">
+          <span class="flag-badge">🇺🇿</span> BMM_UZ EDITION
+        </div>
+        <h1 class="game-title">PARKING BMM_UZ</h1>
+        <p class="game-subtitle">O'ZBEKISTON SHAHAR VA PARKOVKA SIMULYATORI</p>
+      </div>
+
+      <div class="menu-buttons clickable">
+        <button id="btn-play" class="btn btn-primary">
+          <i class="fa-solid fa-play"></i> O'YINNI BOSHLASH
+        </button>
+        <button id="btn-garage" class="btn btn-secondary">
+          <i class="fa-solid fa-warehouse"></i> MASHINA TANLASH (GARAJ)
+        </button>
+        <button id="btn-records" class="btn btn-secondary">
+          <i class="fa-solid fa-trophy"></i> REKORDLAR
+        </button>
+        <button id="btn-help" class="btn btn-secondary">
+          <i class="fa-solid fa-gamepad"></i> BOSHQARUV VA QOIDALAR
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. GARAJ / MASHINA TANLASH (GARAGE SCREEN) -->
+    <div id="garage-menu" class="screen">
+      <div class="garage-hud">
+        <div class="garage-top">
+          <button id="garage-back-btn" class="btn btn-secondary clickable">
+            <i class="fa-solid fa-arrow-left"></i> ORQAGA
+          </button>
+          <div class="garage-title">
+            <h2>AVTO GARAJ BMM_UZ</h2>
+            <p>O'zingizga yoqqan O'zbekiston mashinasini tanlang</p>
+          </div>
+          <button id="garage-drive-btn" class="btn btn-primary clickable">
+            <i class="fa-solid fa-car"></i> SHAHARGA CHIQISH
+          </button>
+        </div>
+
+        <div class="garage-bottom">
+          <!-- Mashina parametrlari kartasi -->
+          <div class="car-stats-card clickable">
+            <div class="car-name-plate">
+              <h3 id="garage-car-name">Gentra / Lacetti</h3>
+              <div id="garage-car-badge" class="car-badge-text">★ Qorabayir Style ★</div>
+            </div>
+            <p id="garage-car-desc" style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 15px;">
+              O'zbekistondagi eng mashhur va obro'li sedan.
+            </p>
+
+            <div class="stat-row">
+              <div class="stat-label-group">
+                <span>Maksimal Tezlik</span>
+                <strong id="stat-speed-val">85%</strong>
+              </div>
+              <div class="stat-bar-container">
+                <div id="stat-speed-bar" class="stat-bar-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-label-group">
+                <span>Tezlanish (0-100)</span>
+                <strong id="stat-accel-val">80%</strong>
+              </div>
+              <div class="stat-bar-container">
+                <div id="stat-accel-bar" class="stat-bar-fill" style="width: 80%;"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-label-group">
+                <span>Burilish va Boshqaruv</span>
+                <strong id="stat-handling-val">82%</strong>
+              </div>
+              <div class="stat-bar-container">
+                <div id="stat-handling-bar" class="stat-bar-fill" style="width: 82%;"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-label-group">
+                <span>Tormozlanish</span>
+                <strong id="stat-brake-val">85%</strong>
+              </div>
+              <div class="stat-bar-container">
+                <div id="stat-brake-bar" class="stat-bar-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <!-- Rang tanlash -->
+            <div class="color-picker-box">
+              <label>KUZOV RANGI:</label>
+              <div id="garage-color-dots" class="color-dots">
+                <!-- Javascript orqali yuklanadi -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Oldinga va orqaga o'tkazish tugmalari -->
+          <div class="garage-carousel-nav">
+            <button id="garage-prev-car" class="nav-arrow-btn" title="Oldingi avto">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button id="garage-next-car" class="nav-arrow-btn" title="Keyingi avto">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. REKORDLAR MODAL OYNASI -->
+    <div id="records-modal" class="modal-overlay">
+      <div class="modal-card clickable">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-trophy" style="color: #ffd700;"></i> REKORDLAR VA NATIJALAR</h3>
+          <button class="close-btn">&times;</button>
+        </div>
+        <div id="records-list-container" class="records-list">
+          <!-- Records dynamically populated from localStorage -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. BOSHQARUV VA YORDAM MODAL OYNASI -->
+    <div id="help-modal" class="modal-overlay">
+      <div class="modal-card clickable">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-gamepad" style="color: var(--primary);"></i> O'YIN BOSHQARUVI</h3>
+          <button class="close-btn">&times;</button>
+        </div>
+        <div style="color: #cbd5e1; line-height: 1.8; font-size: 1.05rem;">
+          <p><span class="key-badge">W</span> yoki <span class="key-badge">↑</span> : Gaz (Oldinga yurish)</p>
+          <p><span class="key-badge">S</span> yoki <span class="key-badge">↓</span> : Tormoz / Orqaga harakatlanish</p>
+          <p><span class="key-badge">A</span> yoki <span class="key-badge">←</span> : Chapga burilish</p>
+          <p><span class="key-badge">D</span> yoki <span class="key-badge">→</span> : O'ngga burilish</p>
+          <p><span class="key-badge">SPACE</span> : Qo'l tormozi (Drayv / Drift)</p>
+          <p><span class="key-badge">C</span> : Kamera rejimini o'zgartirish (Orqa / Salon / Tepadan)</p>
+          <p><span class="key-badge">H</span> : Gudok / Signal chaling</p>
+          <p><span class="key-badge">R</span> : Mashinani yo'lga qayta tiklash</p>
+          <p><span class="key-badge">ESC</span> : Menyu / Tanaffus</p>
+          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+          <h4 style="color: #00e676; margin-bottom: 6px;">🎯 Parkovka Qoidasi:</h4>
+          <p>Shaharda yashil chiroqli nishon (P) ga boring. Mashinani parking to'rtburchagi ichiga to'g'ri joylashtirib, 2 soniya to'xtab turing va ball to'plang!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. IN-GAME HUD LAYER -->
+    <div id="hud-view">
+      <!-- Tepangi ma'lumotlar -->
+      <div class="hud-top-bar">
+        <div class="mission-card">
+          <div class="mission-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="mission-texts">
+            <h4>NISHONLI PARKOVKA</h4>
+            <p id="mission-target-name">Savdo Markazi #1</p>
+          </div>
+        </div>
+
+        <div class="stats-group">
+          <div class="stat-pill score">
+            <span class="label">Ball</span>
+            <span id="hud-score-val" class="value">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">Parkovka</span>
+            <span id="hud-parks-val" class="value">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">Streak</span>
+            <span id="hud-streak-val" class="value">x0</span>
+          </div>
+        </div>
+
+        <div class="top-right-group">
+          <div style="display: flex; gap: 8px;">
+            <button id="hud-horn-btn" class="hud-action-btn" title="Gudok (H)"><i class="fa-solid fa-bullhorn"></i></button>
+            <button id="hud-cam-btn" class="hud-action-btn" title="Kamera (C)"><i class="fa-solid fa-video"></i></button>
+            <button id="hud-menu-btn" class="hud-action-btn" title="Menyu (Esc)"><i class="fa-solid fa-bars"></i></button>
+          </div>
+
+          <!-- Mini Radar Map -->
+          <div id="minimap-container">
+            <canvas id="minimap-canvas" width="170" height="170"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parkovka Aniqlik Radari / Assist Bar -->
+      <div id="parking-assist-bar" class="parking-assist-bar">
+        <div class="assist-gauge">
+          <span>MASOFA</span>
+          <strong id="assist-dist-val" style="color: var(--primary);">0.0 m</strong>
+        </div>
+        <div class="assist-gauge">
+          <span>BURCHAK</span>
+          <strong id="assist-angle-val" style="color: #ffb703;">To'g'rilang</strong>
+        </div>
+        <div class="assist-gauge">
+          <span>JOYDA TURISH</span>
+          <div class="hold-meter">
+            <div id="assist-hold-fill" class="hold-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pastki Qism: Spidometr & Touch Kontrollar -->
+      <div class="hud-bottom-bar">
+        <!-- Spidometr -->
+        <div class="speedometer-widget">
+          <div class="speed-display">
+            <span id="speed-number" class="speed-value">0</span>
+            <span class="speed-unit">KM/SOAT</span>
+          </div>
+          <div id="gear-indicator" class="gear-display">D</div>
+        </div>
+
+        <!-- Boshqaruv tugmalari eslatmasi -->
+        <div class="car-controls-hint">
+          <span><span class="key-badge">W,A,S,D</span> Harakat</span>
+          <span><span class="key-badge">SPACE</span> Tormoz</span>
+          <span><span class="key-badge">H</span> Gudok</span>
+          <span><span class="key-badge">C</span> Kamera</span>
+        </div>
+      </div>
+
+      <!-- Mobil / Touch Sensor Tugmalar -->
+      <div class="touch-controls">
+        <div class="touch-steering">
+          <div id="btn-left" class="touch-btn"><i class="fa-solid fa-chevron-left"></i></div>
+          <div id="btn-right" class="touch-btn"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+        <div class="touch-pedals">
+          <div id="btn-handbrake" class="touch-btn" style="font-size: 1rem; font-weight: 800;">(P)</div>
+          <div id="btn-brake" class="touch-btn pedal-brake"><i class="fa-solid fa-arrow-down"></i></div>
+          <div id="btn-gas" class="touch-btn pedal-gas"><i class="fa-solid fa-arrow-up"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Muvaffaqiyatli Parkovka Banneri -->
+    <div id="parking-success-toast">
+      <h2>🎉 MUVAFFAQIYATLI PARKOVKA!</h2>
+      <p id="toast-points-text">+500 Ball! Mukammal joylashuv</p>
+    </div>
+
+  </div>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Game Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/city.js"></script>
+  <script src="js/traffic.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
